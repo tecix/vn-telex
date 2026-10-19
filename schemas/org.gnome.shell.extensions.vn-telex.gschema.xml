@@ -20,6 +20,12 @@
       <summary>What to do when nothing is selected</summary>
       <description>auto: select to the paragraph start (Ctrl+Shift+Up) and convert; ask: ask first; none: do nothing.</description>
     </key>
+    <key name="copy-timeout" type="i">
+      <range min="100" max="2000"/>
+      <default>600</default>
+      <summary>How long to wait for copied text (ms)</summary>
+      <description>If Ctrl+C copies nothing within this time, the selection is treated as empty. Lower is faster; raise it if slow apps are wrongly treated as having no selection.</description>
+    </key>
     <key name="show-notifications" type="b">
       <default>true</default>
       <summary>Show notifications</summary>

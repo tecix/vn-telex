@@ -30,6 +30,9 @@ const VI = {
     'Show a confirmation dialog': 'Hiện hộp thoại xác nhận',
     'Do nothing': 'Không làm gì',
     'Just report that nothing is selected': 'Chỉ báo chưa có vùng chọn',
+    'Selection wait time (ms)': 'Thời gian chờ vùng chọn (ms)',
+    'How long to wait for copied text before treating the selection as empty. Lower is faster; raise it if some apps get treated as having no selection.':
+        'Thời gian chờ text được sao chép trước khi coi như chưa bôi đen. Càng thấp càng nhanh; tăng lên nếu có app bị nhận nhầm là chưa bôi đen.',
     'Show notifications': 'Hiện thông báo',
     'Tell me when a conversion can’t run (terminal, no text…)': 'Báo khi không chuyển được (terminal, không có text…)',
     'Language': 'Ngôn ngữ',

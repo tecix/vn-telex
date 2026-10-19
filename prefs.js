@@ -108,6 +108,12 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         });
         group.add(emptyRow);
 
+        const timeoutRow = Adw.SpinRow.new_with_range(0, 2000, 50);
+        timeoutRow.title = _('Selection wait time (ms)');
+        timeoutRow.subtitle = _('How long to wait for copied text before treating the selection as empty. Lower is faster; raise it if some apps get treated as having no selection.');
+        settings.bind('copy-timeout', timeoutRow, 'value', Gio.SettingsBindFlags.DEFAULT);
+        group.add(timeoutRow);
+
         const notifyRow = new Adw.SwitchRow({
             title: _('Show notifications'),
             subtitle: _('Tell me when a conversion can’t run (terminal, no text…)'),

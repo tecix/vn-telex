@@ -76,6 +76,7 @@ gnome-extensions prefs vn-telex@tecix
 |---|---|---|
 | Shortcut | `Super+Shift+A` | Click the row and press a new combination. |
 | When nothing is selected | Select to paragraph start | Sends Ctrl+Shift+↑ and converts the result. You can also choose *Ask first* or *Do nothing*. |
+| Selection wait time | 600 ms | How long to wait for Ctrl+C to copy something before treating the selection as empty. Lower it to make *When nothing is selected* kick in faster; raise it if a slow app is wrongly treated as having no selection. |
 | Show notifications | On | Tells you when nothing could be converted. |
 | Language | Automatic | Sets the interface language: Automatic, English or Tiếng Việt. |
 | Skip words | ~50 tech terms | Words that are never converted. Each entry matches by prefix, so `test` also covers `tests` and `testing`. |
@@ -101,7 +102,7 @@ xnoremap <leader>tv :!~/.local/share/gnome-shell/extensions/vn-telex@tecix/cli.j
 ## How it works
 
 1. The shortcut fires. The extension waits for you to release the modifier keys, then saves your clipboard.
-2. It sends a virtual **Ctrl+C** and waits for the copied text to appear.
+2. It sends a virtual **Ctrl+C** and waits for the copied text to appear (up to *Selection wait time*).
 3. The text is converted word by word. Skip words and anything that isn't a valid Vietnamese syllable are
    kept as typed.
 4. It places the result on the clipboard, sends **Ctrl+V**, and then restores your original clipboard.

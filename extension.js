@@ -32,6 +32,9 @@ const TERMINALS = [
 // A conversion that hasn't finished by then is abandoned so the hotkey never stays dead
 const BUSY_TIMEOUT_MS = 5000;
 
+// Clipboard polling interval while waiting for Ctrl+C; the total wait is the 'copy-timeout' setting
+const COPY_POLL_MS = 30;
+
 const MODS = Clutter.ModifierType.SHIFT_MASK | Clutter.ModifierType.CONTROL_MASK |
     Clutter.ModifierType.MOD1_MASK | Clutter.ModifierType.MOD4_MASK |
     Clutter.ModifierType.SUPER_MASK | Clutter.ModifierType.HYPER_MASK | Clutter.ModifierType.META_MASK;
@@ -285,15 +288,15 @@ export default class VnTelexExtension extends Extension {
         dialog.open(global.get_current_time());
     }
 
-    // Poll the clipboard until the app has replaced our marker (max ~600 ms)
+    // Poll the clipboard until the app has replaced our marker (max 'copy-timeout' ms)
     _waitForCopy(marker, tries, cb) {
-        this._later(30, () => {
+        this._later(COPY_POLL_MS, () => {
             this._clipboard.get_text(St.ClipboardType.CLIPBOARD, (_c, text) => {
                 if (!this._settings)
                     return;
                 if (text && text !== marker) {
                     cb(text);
-                } else if (tries >= 20) {
+                } else if ((tries + 1) * COPY_POLL_MS >= this._settings.get_int('copy-timeout')) {
                     cb(null);
                 } else {
                     this._waitForCopy(marker, tries + 1, cb);
