@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8443a"/>
+      <stop offset="1" stop-color="#c41e16"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="26" fill="url(#bg)"/>
+  <!-- keycap -->
+  <rect x="22" y="78" width="84" height="26" rx="7" fill="#000" opacity="0.18"/>
+  <rect x="22" y="74" width="84" height="26" rx="7" fill="#fff" opacity="0.95"/>
+  <text x="64" y="93" font-family="Ubuntu Mono, DejaVu Sans Mono, monospace" font-size="17" font-weight="700"
+        text-anchor="middle" fill="#c41e16">uwow</text>
+  <!-- result -->
+  <text x="64" y="62" font-family="Ubuntu, Cantarell, DejaVu Sans, sans-serif" font-size="48" font-weight="700"
+        text-anchor="middle" fill="#ffcd00">ươ</text>
+</svg>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <enum id="org.gnome.shell.extensions.vn-telex.EmptySelection">
+    <value nick="auto" value="0"/>
+    <value nick="ask" value="1"/>
+    <value nick="none" value="2"/>
+  </enum>
+  <enum id="org.gnome.shell.extensions.vn-telex.Language">
+    <value nick="auto" value="0"/>
+    <value nick="en" value="1"/>
+    <value nick="vi" value="2"/>
+  </enum>
+  <schema id="org.gnome.shell.extensions.vn-telex" path="/org/gnome/shell/extensions/vn-telex/">
+    <key name="hotkey" type="as">
+      <default><![CDATA[['<Super><Shift>a']]]></default>
+      <summary>Shortcut that converts the selection</summary>
+    </key>
+    <key name="empty-selection" enum="org.gnome.shell.extensions.vn-telex.EmptySelection">
+      <default>'auto'</default>
+      <summary>What to do when nothing is selected</summary>
+      <description>auto: select to the paragraph start (Ctrl+Shift+Up) and convert; ask: ask first; none: do nothing.</description>
+    </key>
+    <key name="show-notifications" type="b">
+      <default>true</default>
+      <summary>Show notifications</summary>
+    </key>
+    <key name="skip-words" type="s">
+      <default>'aws, bits, bots, box, cart, chart, churn, core, cost, dart, data, deep, desk, disk, dist, docs, erp, hook, host, iaas, kafka, loop, mark, mask, meet, mix, next, nginx, nuxt, okr, paas, pair, par, peer, port, pos, queries, queue, ref, res, root, rows, saas, sort, task, tax, term, test, text, ux'</default>
+      <summary>English words to leave untouched (comma-separated, prefix match)</summary>
+    </key>
+    <key name="language" enum="org.gnome.shell.extensions.vn-telex.Language">
+      <default>'auto'</default>
+      <summary>Interface language</summary>
+      <description>auto: follow the system locale; en: English; vi: Vietnamese.</description>
+    </key>
+  </schema>
+</schemalist>

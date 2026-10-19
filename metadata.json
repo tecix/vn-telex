@@ -1,0 +1,9 @@
+{
+  "uuid": "vn-telex@tecix",
+  "name": "VN Telex",
+  "description": "Turn Telex text into accented Vietnamese, right where you typed it.\n\nForgot to switch your input method? Select the text, press Super+Shift+A, and \"Tieengs Vieetj\" becomes \"Tiếng Việt\" in place — in any app, on Wayland and X11.\n\n• Your clipboard is kept intact (text and images)\n• English words like \"test\" or \"data\" are left alone, using a customizable skip list\n• Nothing selected? Converts back to the paragraph start, asks first, or does nothing\n• Live preview and shortcut recorder in Preferences\n• English and Vietnamese interface",
+  "shell-version": ["46", "47", "48", "49", "50", "51"],
+  "settings-schema": "org.gnome.shell.extensions.vn-telex",
+  "version-name": "1.8.0",
+  "url": "https://github.com/tecix/vn-telex"
+}
