@@ -104,7 +104,7 @@ gnome-extensions prefs vn-telex@tecix
 | When nothing is selected | Select to paragraph start | Sends Ctrl+Shift+↑ and converts the result. You can also choose *Ask first* or *Do nothing*. |
 | Selection wait time | 600 ms | How long to wait for Ctrl+C to copy something before treating the selection as empty. Lower it to make *When nothing is selected* kick in faster; raise it if a slow app is wrongly treated as having no selection. |
 | Fast mode (Advanced) | Off | Makes *When nothing is selected* much faster. It reacts as soon as an app copies instead of checking every 30 ms, learns how fast each app copies and waits only 2 × the slowest copy + 40 ms (at least 80 ms, at most *Selection wait time*), and runs both copy attempts in one clipboard session. If a slow app is wrongly treated as having no selection, forget the learned timings or turn it off. |
-| In terminals | Replace what you just typed | Copies with Ctrl+Shift+C, erases the changed part with Backspace and pastes the result with Ctrl+Shift+V. You can also choose *Copy the result* (to paste yourself) or *Do nothing*. See [Terminals and Neovim](#terminals-and-neovim). |
+| In terminals | Do nothing | Choose *Replace what you just typed* to convert in place: copies with Ctrl+Shift+C, erases the changed part with Backspace and pastes the result with Ctrl+Shift+V. Or choose *Copy the result* to paste it yourself. See [Terminals and Neovim](#terminals-and-neovim). |
 | Show notifications | On | Tells you when nothing could be converted. |
 | Language | Automatic | Sets the interface language: Automatic, English or Tiếng Việt. |
 | Skip words | ~50 tech terms | Words that are never converted. Each entry matches by prefix, so `test` also covers `tests` and `testing`. |

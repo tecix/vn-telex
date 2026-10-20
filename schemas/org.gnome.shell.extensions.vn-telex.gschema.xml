@@ -26,7 +26,7 @@
       <description>auto: select to the paragraph start (Ctrl+Shift+Up) and convert; ask: ask first; none: do nothing.</description>
     </key>
     <key name="terminal-mode" enum="org.gnome.shell.extensions.vn-telex.TerminalMode">
-      <default>'replace'</default>
+      <default>'off'</default>
       <summary>What to do in terminals</summary>
       <description>replace: copy the selection with Ctrl+Shift+C, erase the changed part with Backspace and paste the result with Ctrl+Shift+V (the selection must end at the cursor); copy: only put the result on the clipboard; off: do nothing.</description>
     </key>

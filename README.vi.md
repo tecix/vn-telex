@@ -103,7 +103,7 @@ gnome-extensions prefs vn-telex@tecix
 | Khi không bôi đen gì | Tự chọn tới đầu đoạn | Gửi Ctrl+Shift+↑ rồi chuyển phần được chọn. Bạn cũng có thể chọn *Hỏi trước* hoặc *Không làm gì*. |
 | Thời gian chờ vùng chọn | 600 ms | Thời gian chờ Ctrl+C sao chép được gì đó trước khi coi như không có vùng chọn. Giảm xuống để *Khi không bôi đen gì* phản hồi nhanh hơn; tăng lên nếu một ứng dụng chậm bị coi nhầm là không có vùng chọn. |
 | Chế độ nhanh (Nâng cao) | Tắt | Giúp *Khi không bôi đen gì* nhanh hơn nhiều. Phản hồi ngay khi app sao chép xong thay vì kiểm tra mỗi 30 ms, học tốc độ sao chép của từng app để chỉ chờ 2 × lần chậm nhất + 40 ms (ít nhất 80 ms, tối đa bằng *Thời gian chờ vùng chọn*), và gộp hai lần sao chép vào một phiên clipboard. Nếu một app chậm bị nhận nhầm là chưa bôi đen, hãy xoá thời gian đã học hoặc tắt chế độ này. |
-| Trong terminal | Thay phần vừa gõ | Sao chép bằng Ctrl+Shift+C, xoá phần thay đổi bằng Backspace rồi dán kết quả bằng Ctrl+Shift+V. Bạn cũng có thể chọn *Chỉ sao chép kết quả* (để tự dán) hoặc *Không làm gì*. Xem [Terminal và Neovim](#terminal-và-neovim). |
+| Trong terminal | Không làm gì | Chọn *Thay phần vừa gõ* để chuyển tại chỗ: sao chép bằng Ctrl+Shift+C, xoá phần thay đổi bằng Backspace rồi dán kết quả bằng Ctrl+Shift+V. Hoặc chọn *Chỉ sao chép kết quả* để tự dán. Xem [Terminal và Neovim](#terminal-và-neovim). |
 | Hiện thông báo | Bật | Báo cho bạn khi không có gì để chuyển. |
 | Ngôn ngữ | Tự động | Đặt ngôn ngữ giao diện: Tự động, English hoặc Tiếng Việt. |
 | Từ bỏ qua | ~50 thuật ngữ kỹ thuật | Những từ không bao giờ được chuyển. Mỗi mục khớp theo tiền tố, nên `test` cũng áp dụng cho `tests` và `testing`. |
