@@ -29,7 +29,7 @@ Tiếng Việt không dấu, deploy lên server
 ```
 
 No input method needed and no copying back and forth. It works in browsers, editors, chat apps, and any
-other app that supports Ctrl+C and Ctrl+V.
+other app that supports Ctrl+C and Ctrl+V, plus terminals.
 
 ## Use cases
 
@@ -43,8 +43,8 @@ other app that supports Ctrl+C and Ctrl+V.
   (duplicated letters, swallowed characters) are no problem: you type plain ASCII and convert afterwards.
 - 💬 **Mixed Vietnamese and tech talk.** Chatting with your team about `deploy`, `merge` and `staging` in
   Vietnamese? English words stay untouched while the Telex around them gets its accents.
-- 🖥️ **Terminal and Neovim users.** Pipe text through `cli.js` or bind it to a key in Vim to write commit
-  messages and notes in Vietnamese.
+- 🖥️ **Terminal users.** Type a commit message or a prompt for a CLI tool in Telex, select it and convert it
+  right in GNOME Terminal, Ptyxis, Kitty, Alacritty, WezTerm or Ghostty. In Neovim, bind `cli.js` to a key.
 
 ## Features
 
@@ -104,14 +104,33 @@ gnome-extensions prefs vn-telex@tecix
 | When nothing is selected | Select to paragraph start | Sends Ctrl+Shift+↑ and converts the result. You can also choose *Ask first* or *Do nothing*. |
 | Selection wait time | 600 ms | How long to wait for Ctrl+C to copy something before treating the selection as empty. Lower it to make *When nothing is selected* kick in faster; raise it if a slow app is wrongly treated as having no selection. |
 | Fast mode (Advanced) | Off | Makes *When nothing is selected* much faster. It reacts as soon as an app copies instead of checking every 30 ms, learns how fast each app copies and waits only 2 × the slowest copy + 40 ms (at least 80 ms, at most *Selection wait time*), and runs both copy attempts in one clipboard session. If a slow app is wrongly treated as having no selection, forget the learned timings or turn it off. |
+| In terminals | Replace what you just typed | Copies with Ctrl+Shift+C, erases the changed part with Backspace and pastes the result with Ctrl+Shift+V. You can also choose *Copy the result* (to paste yourself) or *Do nothing*. See [Terminals and Neovim](#terminals-and-neovim). |
 | Show notifications | On | Tells you when nothing could be converted. |
 | Language | Automatic | Sets the interface language: Automatic, English or Tiếng Việt. |
 | Skip words | ~50 tech terms | Words that are never converted. Each entry matches by prefix, so `test` also covers `tests` and `testing`. |
 
 ## Terminals and Neovim
 
-Terminals don't paste with Ctrl+V, and pasting into Neovim's normal mode would run the text as commands.
-For that reason, the shortcut does nothing in terminal windows. Use the command-line filter instead:
+Terminals copy and paste with Ctrl+Shift+C and Ctrl+Shift+V, and their selection is only a highlight on
+the screen: it can't be replaced the way a text field's can. So in a terminal the extension:
+
+1. copies the selection with **Ctrl+Shift+C**,
+2. converts it and keeps only the part that changed (`chaof` → `chào` changes just `of` → `ào`),
+3. sends one **Backspace** per changed character, then pastes the new part with **Ctrl+Shift+V**.
+
+This works for text you just typed at a shell prompt, in a TUI's input box or in Neovim's insert mode. Two
+rules follow from step 3:
+
+- **The selection must end at the cursor.** Select what you just typed, or triple-click the prompt line:
+  the prompt itself is left alone, because only the changed part is erased.
+- **No trailing space.** Terminals drop trailing spaces from a selection, so if the cursor is after a space,
+  one character too few would be erased. Convert before typing the space.
+
+If the change spans several lines, Backspace can't reach it, so the result is put on the clipboard instead
+and you paste it yourself. The same happens for every conversion when *In terminals* is set to *Copy the
+result*. xterm, urxvt and st have no Ctrl+Shift+C (it would reach the shell as Ctrl+C), so they are skipped.
+
+For Neovim's normal and visual modes, or for scripts and pipes, use the command-line filter:
 
 ```sh
 echo "Xin chaof cacs banj" | ~/.local/share/gnome-shell/extensions/vn-telex@tecix/cli.js
@@ -165,11 +184,11 @@ journalctl -f -o cat /usr/bin/gnome-shell | grep -i telex
 
 - GNOME Shell 46, 47, 48, 49 and 50
 - Wayland and X11
-- The app must support Ctrl+C and Ctrl+V. Terminals are detected and skipped.
+- The app must support Ctrl+C and Ctrl+V. Terminals are detected and use Ctrl+Shift+C and Ctrl+Shift+V.
 
 ## TODO
 
-- [ ] 🖥️ **Terminals:** convert in place in terminal emulators (GNOME Terminal, Ptyxis, Kitty, Alacritty,
+- [x] 🖥️ **Terminals:** convert in place in terminal emulators (GNOME Terminal, Ptyxis, Kitty, Alacritty,
   WezTerm) using Ctrl+Shift+C / Ctrl+Shift+V instead of skipping them.
 - [ ] 🦊 **Firefox extension:** convert the selection in any text field, on every OS.
 - [ ] 🌐 **Chrome extension:** the same for Chrome, Edge, Brave and other Chromium browsers.

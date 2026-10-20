@@ -15,6 +15,12 @@ const EMPTY_SELECTION = [
     ['none', 'Do nothing', 'Just report that nothing is selected'],
 ];
 
+const TERMINAL_MODE = [
+    ['replace', 'Replace what you just typed', 'Select text that ends at the cursor; it’s erased with Backspace and the result pasted with Ctrl+Shift+V'],
+    ['copy', 'Copy the result', 'Put the converted text on the clipboard to paste yourself'],
+    ['off', 'Do nothing', 'Skip terminal windows'],
+];
+
 // Language names stay in their own language
 const LANGUAGES = [
     ['auto', null],
@@ -90,27 +96,8 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         syncHotkey();
         group.add(hotkeyRow);
 
-        // What to do when nothing is selected
-        const model = new Gtk.StringList();
-        for (const [, title] of EMPTY_SELECTION)
-            model.append(_(title));
-        const emptyRow = new Adw.ComboRow({
-            title: _('When nothing is selected'),
-            model,
-        });
-        const syncEmpty = () => {
-            const i = EMPTY_SELECTION.findIndex(([id]) => id === settings.get_string('empty-selection'));
-            emptyRow.selected = Math.max(i, 0);
-            emptyRow.subtitle = _(EMPTY_SELECTION[emptyRow.selected][2]);
-        };
-        settings.connect('changed::empty-selection', syncEmpty);
-        syncEmpty();
-        emptyRow.connect('notify::selected', () => {
-            const id = EMPTY_SELECTION[emptyRow.selected]?.[0];
-            if (id && id !== settings.get_string('empty-selection'))
-                settings.set_string('empty-selection', id);
-        });
-        group.add(emptyRow);
+        group.add(this._choiceRow(settings, 'empty-selection', _('When nothing is selected'), EMPTY_SELECTION));
+        group.add(this._choiceRow(settings, 'terminal-mode', _('In terminals'), TERMINAL_MODE));
 
         const timeoutRow = Adw.SpinRow.new_with_range(30, 2000, 10);
         timeoutRow.title = _('Selection wait time (ms)');
@@ -177,6 +164,28 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         group.add(timesRow);
 
         return group;
+    }
+
+    // A combo row for an enum setting; options are [id, title, subtitle], the subtitle follows the choice
+    _choiceRow(settings, key, title, options) {
+        const _ = this._;
+        const model = new Gtk.StringList();
+        for (const [, name] of options)
+            model.append(_(name));
+        const row = new Adw.ComboRow({title, model});
+        const sync = () => {
+            const i = options.findIndex(([id]) => id === settings.get_string(key));
+            row.selected = Math.max(i, 0);
+            row.subtitle = _(options[row.selected][2]);
+        };
+        settings.connect(`changed::${key}`, sync);
+        sync();
+        row.connect('notify::selected', () => {
+            const id = options[row.selected]?.[0];
+            if (id && id !== settings.get_string(key))
+                settings.set_string(key, id);
+        });
+        return row;
     }
 
     _languageRow(window, settings) {
@@ -426,7 +435,7 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         const group = new Adw.PreferencesGroup({title: _('Notes')});
         group.add(new Adw.ActionRow({
             title: _('Terminal'),
-            subtitle: _('Not supported in terminals. For Neovim, map a key to cli.js in the extension folder.'),
+            subtitle: _('Select up to the cursor, without a trailing space. In Neovim use insert mode, or map a key to cli.js in the extension folder.'),
             subtitle_selectable: true,
         }));
         group.add(new Adw.ActionRow({

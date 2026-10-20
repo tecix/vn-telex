@@ -6,7 +6,10 @@ import GLib from 'gi://GLib';
 
 const VI = {
     // extension.js
-    'Not supported in terminals — in Neovim, map a key to cli.js.': 'Terminal không hỗ trợ — trong Neovim, map phím tới cli.js.',
+    'This terminal has no Ctrl+Shift+C — in Neovim, map a key to cli.js.': 'Terminal này không có Ctrl+Shift+C — trong Neovim, map phím tới cli.js.',
+    'Turned off in terminals — in Neovim, map a key to cli.js.': 'Đã tắt trong terminal — trong Neovim, map phím tới cli.js.',
+    'Nothing is selected. In terminals, select the text you just typed.': 'Chưa bôi đen text nào. Trong terminal, hãy bôi đen phần vừa gõ.',
+    'Converted text copied — paste it with Ctrl+Shift+V.': 'Đã sao chép kết quả — dán bằng Ctrl+Shift+V.',
     'Nothing is selected.': 'Chưa bôi đen text nào.',
     'Couldn’t select any text before the cursor.': 'Không chọn được text trước con trỏ.',
     'Nothing selected': 'Không có vùng chọn',
@@ -31,6 +34,13 @@ const VI = {
     'Show a confirmation dialog': 'Hiện hộp thoại xác nhận',
     'Do nothing': 'Không làm gì',
     'Just report that nothing is selected': 'Chỉ báo chưa có vùng chọn',
+    'In terminals': 'Trong terminal',
+    'Replace what you just typed': 'Thay phần vừa gõ',
+    'Select text that ends at the cursor; it’s erased with Backspace and the result pasted with Ctrl+Shift+V':
+        'Bôi đen text kết thúc ở con trỏ; text được xoá bằng Backspace rồi dán kết quả bằng Ctrl+Shift+V',
+    'Copy the result': 'Chỉ sao chép kết quả',
+    'Put the converted text on the clipboard to paste yourself': 'Đưa kết quả vào clipboard để bạn tự dán',
+    'Skip terminal windows': 'Bỏ qua cửa sổ terminal',
     'Selection wait time (ms)': 'Thời gian chờ vùng chọn (ms)',
     'How long to wait for copied text before treating the selection as empty. Lower is faster; raise it if some apps get treated as having no selection.':
         'Thời gian chờ text được sao chép trước khi coi như chưa bôi đen. Càng thấp càng nhanh; tăng lên nếu có app bị nhận nhầm là chưa bôi đen.',
@@ -75,8 +85,8 @@ const VI = {
     'Remove “{word}”': 'Xoá “{word}”',
     'Notes': 'Lưu ý',
     'Terminal': 'Terminal',
-    'Not supported in terminals. For Neovim, map a key to cli.js in the extension folder.':
-        'Không hỗ trợ trong terminal. Với Neovim, map phím tới cli.js trong thư mục extension.',
+    'Select up to the cursor, without a trailing space. In Neovim use insert mode, or map a key to cli.js in the extension folder.':
+        'Bôi đen tới đúng con trỏ, không kèm dấu cách cuối. Trong Neovim hãy ở chế độ insert, hoặc map phím tới cli.js trong thư mục extension.',
     'Clipboard': 'Clipboard',
     'Your clipboard is restored after converting; Copyous is switched to incognito meanwhile.':
         'Clipboard được khôi phục sau khi chuyển; Copyous được bật ẩn danh trong lúc chuyển.',

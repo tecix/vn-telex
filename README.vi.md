@@ -29,7 +29,7 @@ Tiếng Việt không dấu, deploy lên server
 ```
 
 Không cần bộ gõ, không cần sao chép qua lại. Dùng được trong trình duyệt, trình soạn thảo, ứng dụng chat
-và mọi ứng dụng hỗ trợ Ctrl+C và Ctrl+V.
+và mọi ứng dụng hỗ trợ Ctrl+C và Ctrl+V, kể cả terminal.
 
 ## Trường hợp sử dụng
 
@@ -43,8 +43,8 @@ và mọi ứng dụng hỗ trợ Ctrl+C và Ctrl+V.
   mất ký tự) không còn là vấn đề: bạn gõ ASCII thuần rồi chuyển sau.
 - 💬 **Trộn tiếng Việt với thuật ngữ kỹ thuật.** Chat với team về `deploy`, `merge`, `staging` bằng tiếng
   Việt? Từ tiếng Anh được giữ nguyên, phần Telex xung quanh được thêm dấu.
-- 🖥️ **Dân Terminal và Neovim.** Đưa văn bản qua `cli.js` hoặc gán phím trong Vim để viết commit message
-  và ghi chú bằng tiếng Việt.
+- 🖥️ **Dân Terminal.** Gõ commit message hay prompt cho công cụ CLI bằng Telex, bôi đen rồi chuyển ngay
+  trong GNOME Terminal, Ptyxis, Kitty, Alacritty, WezTerm hay Ghostty. Trong Neovim, gán phím cho `cli.js`.
 
 ## Tính năng
 
@@ -103,14 +103,33 @@ gnome-extensions prefs vn-telex@tecix
 | Khi không bôi đen gì | Tự chọn tới đầu đoạn | Gửi Ctrl+Shift+↑ rồi chuyển phần được chọn. Bạn cũng có thể chọn *Hỏi trước* hoặc *Không làm gì*. |
 | Thời gian chờ vùng chọn | 600 ms | Thời gian chờ Ctrl+C sao chép được gì đó trước khi coi như không có vùng chọn. Giảm xuống để *Khi không bôi đen gì* phản hồi nhanh hơn; tăng lên nếu một ứng dụng chậm bị coi nhầm là không có vùng chọn. |
 | Chế độ nhanh (Nâng cao) | Tắt | Giúp *Khi không bôi đen gì* nhanh hơn nhiều. Phản hồi ngay khi app sao chép xong thay vì kiểm tra mỗi 30 ms, học tốc độ sao chép của từng app để chỉ chờ 2 × lần chậm nhất + 40 ms (ít nhất 80 ms, tối đa bằng *Thời gian chờ vùng chọn*), và gộp hai lần sao chép vào một phiên clipboard. Nếu một app chậm bị nhận nhầm là chưa bôi đen, hãy xoá thời gian đã học hoặc tắt chế độ này. |
+| Trong terminal | Thay phần vừa gõ | Sao chép bằng Ctrl+Shift+C, xoá phần thay đổi bằng Backspace rồi dán kết quả bằng Ctrl+Shift+V. Bạn cũng có thể chọn *Chỉ sao chép kết quả* (để tự dán) hoặc *Không làm gì*. Xem [Terminal và Neovim](#terminal-và-neovim). |
 | Hiện thông báo | Bật | Báo cho bạn khi không có gì để chuyển. |
 | Ngôn ngữ | Tự động | Đặt ngôn ngữ giao diện: Tự động, English hoặc Tiếng Việt. |
 | Từ bỏ qua | ~50 thuật ngữ kỹ thuật | Những từ không bao giờ được chuyển. Mỗi mục khớp theo tiền tố, nên `test` cũng áp dụng cho `tests` và `testing`. |
 
 ## Terminal và Neovim
 
-Terminal không dán bằng Ctrl+V, còn dán vào chế độ normal của Neovim sẽ chạy văn bản như lệnh. Vì vậy,
-phím tắt không hoạt động trong cửa sổ terminal. Hãy dùng bộ lọc dòng lệnh:
+Terminal sao chép và dán bằng Ctrl+Shift+C và Ctrl+Shift+V, và vùng chọn trong terminal chỉ là phần tô
+sáng trên màn hình: không thể thay thế như trong ô nhập liệu. Vì vậy trong terminal, extension sẽ:
+
+1. sao chép vùng chọn bằng **Ctrl+Shift+C**,
+2. chuyển đổi và chỉ giữ phần bị thay đổi (`chaof` → `chào` chỉ đổi `of` → `ào`),
+3. gửi một phím **Backspace** cho mỗi ký tự bị thay đổi, rồi dán phần mới bằng **Ctrl+Shift+V**.
+
+Cách này dùng được cho text vừa gõ ở dấu nhắc shell, trong ô nhập của ứng dụng TUI hoặc ở chế độ insert của
+Neovim. Từ bước 3 suy ra hai quy tắc:
+
+- **Vùng chọn phải kết thúc ở con trỏ.** Bôi đen phần vừa gõ, hoặc nhấp ba lần vào dòng lệnh: dấu nhắc
+  được giữ nguyên vì chỉ phần thay đổi bị xoá.
+- **Không kèm dấu cách cuối.** Terminal bỏ dấu cách ở cuối vùng chọn, nên nếu con trỏ nằm sau dấu cách thì
+  sẽ xoá thiếu một ký tự. Hãy chuyển trước khi gõ dấu cách.
+
+Nếu phần thay đổi trải qua nhiều dòng, Backspace không xoá tới được, nên kết quả được đưa vào clipboard để
+bạn tự dán. Điều này cũng áp dụng cho mọi lần chuyển khi *Trong terminal* được đặt là *Chỉ sao chép kết
+quả*. xterm, urxvt và st không có Ctrl+Shift+C (phím này sẽ tới shell thành Ctrl+C), nên chúng bị bỏ qua.
+
+Với chế độ normal và visual của Neovim, hoặc trong script và pipe, hãy dùng bộ lọc dòng lệnh:
 
 ```sh
 echo "Xin chaof cacs banj" | ~/.local/share/gnome-shell/extensions/vn-telex@tecix/cli.js
@@ -163,11 +182,11 @@ journalctl -f -o cat /usr/bin/gnome-shell | grep -i telex
 
 - GNOME Shell 46, 47, 48, 49 và 50
 - Wayland và X11
-- Ứng dụng phải hỗ trợ Ctrl+C và Ctrl+V. Terminal được nhận diện và bỏ qua.
+- Ứng dụng phải hỗ trợ Ctrl+C và Ctrl+V. Terminal được nhận diện và dùng Ctrl+Shift+C và Ctrl+Shift+V.
 
 ## TODO
 
-- [ ] 🖥️ **Terminal:** chuyển ngay tại chỗ trong các terminal (GNOME Terminal, Ptyxis, Kitty, Alacritty,
+- [x] 🖥️ **Terminal:** chuyển ngay tại chỗ trong các terminal (GNOME Terminal, Ptyxis, Kitty, Alacritty,
   WezTerm) bằng Ctrl+Shift+C / Ctrl+Shift+V thay vì bỏ qua.
 - [ ] 🦊 **Extension cho Firefox:** chuyển vùng chọn trong mọi ô nhập liệu, trên mọi hệ điều hành.
 - [ ] 🌐 **Extension cho Chrome:** tương tự cho Chrome, Edge, Brave và các trình duyệt Chromium khác.

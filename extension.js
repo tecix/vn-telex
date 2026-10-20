@@ -6,6 +6,8 @@
 // automatically, after asking, or not at all (setting 'empty-selection').
 // Fast mode (setting 'fast-mode') reacts to the clipboard owner change instead of polling,
 // shortens the wait per app from learned copy times, and runs the fallback in one clipboard session.
+// In terminals (setting 'terminal-mode') it copies with Ctrl+Shift+C, erases the changed tail with
+// Backspace and pastes it with Ctrl+Shift+V, or only puts the result on the clipboard.
 
 import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
@@ -23,13 +25,26 @@ import * as Dialog from 'resource:///org/gnome/shell/ui/dialog.js';
 import {telexTransform, parseSkips} from './telex.js';
 import {translator} from './i18n.js';
 
-// Ctrl+V does not paste in terminals, and pasting into Neovim normal mode runs the text as commands.
+// The code points of `from` after its common prefix with `to`, and the code points of `to` that replace them
+function changedTail(from, to) {
+    const a = [...from];
+    const b = [...to];
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i])
+        i++;
+    return [a.slice(i), b.slice(i).join('')];
+}
+
+// Terminals copy and paste with Ctrl+Shift+C / Ctrl+Shift+V and can't replace a selection
 const TERMINALS = [
     'gnome-terminal', 'gnome-terminal-server', 'org.gnome.terminal', 'org.gnome.ptyxis', 'ptyxis',
     'kgx', 'org.gnome.console', 'kitty', 'alacritty', 'org.wezfurlong.wezterm', 'wezterm',
     'com.mitchellh.ghostty', 'ghostty', 'tilix', 'com.gexperts.tilix', 'konsole', 'org.kde.konsole',
-    'foot', 'footclient', 'xterm', 'terminator', 'com.raggesilver.blackbox', 'blackbox', 'dev.warp.warp',
+    'foot', 'footclient', 'terminator', 'com.raggesilver.blackbox', 'blackbox', 'dev.warp.warp',
 ];
+
+// No Ctrl+Shift+C there: it reaches the shell as Ctrl+C and would interrupt the running program
+const NO_COPY_TERMINALS = ['xterm', 'uxterm', 'urxvt', 'rxvt', 'st', 'st-256color'];
 
 // A conversion that hasn't finished by then is abandoned so the hotkey never stays dead
 const BUSY_TIMEOUT_MS = 5000;
@@ -176,20 +191,26 @@ export default class VnTelexExtension extends Extension {
 
     // ---------- Main flow ----------
 
-    _isTerminal() {
+    // 'terminal', 'unsupported' (a terminal without Ctrl+Shift+C) or null
+    _terminalKind() {
         const w = global.display.focus_window;
         if (!w)
-            return false;
+            return null;
         const ids = [w.get_wm_class(), w.get_wm_class_instance(), w.get_gtk_application_id?.()]
             .filter(Boolean).map(s => s.toLowerCase());
-        return ids.some(id => TERMINALS.includes(id) || id.includes('terminal'));
+        if (ids.some(id => NO_COPY_TERMINALS.includes(id)))
+            return 'unsupported';
+        if (ids.some(id => TERMINALS.includes(id) || id.includes('terminal')))
+            return 'terminal';
+        return null;
     }
 
     _run() {
         if (this._busy || this._dialog)
             return;
-        if (this._isTerminal()) {
-            this._notify(this._('Not supported in terminals — in Neovim, map a key to cli.js.'));
+        const terminal = this._terminalKind();
+        if (terminal) {
+            this._runInTerminal(terminal);
             return;
         }
         this._setBusy();
@@ -211,6 +232,62 @@ export default class VnTelexExtension extends Extension {
                 }
             }));
         });
+    }
+
+    // A terminal can't replace its selection. Copy it with Ctrl+Shift+C, then either erase the changed
+    // tail with Backspace and paste the new one with Ctrl+Shift+V (which assumes the selection ends at
+    // the cursor, i.e. text just typed), or leave the result on the clipboard ('terminal-mode' = 'copy').
+    _runInTerminal(kind) {
+        const mode = this._settings.get_string('terminal-mode');
+        if (kind === 'unsupported' || mode === 'off') {
+            this._notify(kind === 'unsupported'
+                ? this._('This terminal has no Ctrl+Shift+C — in Neovim, map a key to cli.js.')
+                : this._('Turned off in terminals — in Neovim, map a key to cli.js.'));
+            return;
+        }
+        this._setBusy();
+        const type = St.ClipboardType.CLIPBOARD;
+
+        this._afterModifiersReleased(() => this._withClipboard(end => {
+            const done = (pasted, after) => end(pasted, () => {
+                this._busy = false;
+                after?.();
+            });
+            const marker = `⁣vntelex${GLib.get_monotonic_time()}`;
+            this._clipboard.set_text(type, marker);
+            this._waitForCopy(marker, copied => {
+                if (!copied) {
+                    done(false, () => this._notify(this._('Nothing is selected. In terminals, select the text you just typed.')));
+                    return;
+                }
+                // A selected line ends with a newline that isn't part of the input
+                const text = copied.replace(/\n+$/, '');
+                const out = telexTransform(text, parseSkips(this._settings.get_string('skip-words')));
+                if (out === text) {
+                    done(false);
+                    return;
+                }
+                const [erase, insert] = changedTail(text, out);
+                // Backspace can't cross lines in a shell prompt, so multi-line changes are only copied
+                if (mode === 'copy' || erase.includes('\n') || insert.includes('\n')) {
+                    // Set after the restore, outside Copyous incognito: this result is meant to be kept
+                    done(false, () => {
+                        this._clipboard.set_text(type, out);
+                        this._notify(this._('Converted text copied — paste it with Ctrl+Shift+V.'));
+                    });
+                    return;
+                }
+                this._clipboard.set_text(type, insert);
+                this._later(30, () => {
+                    for (let i = 0; i < erase.length; i++)
+                        this._tap(Clutter.KEY_BackSpace);
+                    if (insert)
+                        this._ctrlShift(Clutter.KEY_v);
+                    done(insert !== '');
+                });
+            });
+            this._ctrlShift(Clutter.KEY_c);
+        }));
     }
 
     _nothingSelected(window) {
@@ -463,6 +540,11 @@ export default class VnTelexExtension extends Extension {
     _key(keyval, down) {
         this._kbd.notify_keyval(GLib.get_monotonic_time(), keyval,
             down ? Clutter.KeyState.PRESSED : Clutter.KeyState.RELEASED);
+    }
+
+    _tap(keyval) {
+        this._key(keyval, true);
+        this._key(keyval, false);
     }
 
     _combo(modifier, keyval) {
