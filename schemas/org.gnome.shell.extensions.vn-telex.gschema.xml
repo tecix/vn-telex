@@ -21,10 +21,20 @@
       <description>auto: select to the paragraph start (Ctrl+Shift+Up) and convert; ask: ask first; none: do nothing.</description>
     </key>
     <key name="copy-timeout" type="i">
-      <range min="100" max="2000"/>
+      <range min="30" max="2000"/>
       <default>600</default>
       <summary>How long to wait for copied text (ms)</summary>
       <description>If Ctrl+C copies nothing within this time, the selection is treated as empty. Lower is faster; raise it if slow apps are wrongly treated as having no selection.</description>
+    </key>
+    <key name="fast-mode" type="b">
+      <default>false</default>
+      <summary>Fast mode</summary>
+      <description>Detects the copy as soon as the app sets the clipboard, learns how fast each app copies and shortens the wait to match, and skips the pauses between the no-selection fallback steps.</description>
+    </key>
+    <key name="copy-times" type="a{si}">
+      <default>{}</default>
+      <summary>Learned copy times per app (ms)</summary>
+      <description>The slowest Ctrl+C seen in each app while fast mode is on. Used to shorten the selection wait time.</description>
     </key>
     <key name="show-notifications" type="b">
       <default>true</default>

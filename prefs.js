@@ -46,6 +46,7 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         window.add(page);
 
         page.add(this._generalGroup(window, settings));
+        page.add(this._advancedGroup(settings));
         page.add(this._tryGroup(settings));
         page.add(this._skipGroup(window, settings));
         page.add(this._tipsGroup());
@@ -111,7 +112,7 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         });
         group.add(emptyRow);
 
-        const timeoutRow = Adw.SpinRow.new_with_range(0, 2000, 50);
+        const timeoutRow = Adw.SpinRow.new_with_range(30, 2000, 10);
         timeoutRow.title = _('Selection wait time (ms)');
         timeoutRow.subtitle = _('How long to wait for copied text before treating the selection as empty. Lower is faster; raise it if some apps get treated as having no selection.');
         settings.bind('copy-timeout', timeoutRow, 'value', Gio.SettingsBindFlags.DEFAULT);
@@ -125,6 +126,55 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         group.add(notifyRow);
 
         group.add(this._languageRow(window, settings));
+
+        return group;
+    }
+
+    // ---------- Advanced ----------
+
+    _advancedGroup(settings) {
+        const _ = this._;
+        const group = new Adw.PreferencesGroup({title: _('Advanced')});
+
+        const fastRow = new Adw.SwitchRow({
+            title: _('Fast mode'),
+            subtitle: _('Speeds up “When nothing is selected”: reacts the moment an app copies, learns how fast each app copies and waits only that long, and skips the pauses between steps. If a slow app is wrongly treated as having no selection, forget its timing or turn this off.'),
+        });
+        settings.bind('fast-mode', fastRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        group.add(fastRow);
+
+        // Learned copy times, one row per app
+        const timesRow = new Adw.ExpanderRow({title: _('Learned app timings')});
+        const forget = new Gtk.Button({
+            icon_name: 'edit-clear-all-symbolic',
+            tooltip_text: _('Forget all learned timings'),
+            valign: Gtk.Align.CENTER,
+            css_classes: ['flat'],
+        });
+        forget.connect('clicked', () => settings.reset('copy-times'));
+        timesRow.add_suffix(forget);
+
+        let appRows = [];
+        const syncTimes = () => {
+            for (const row of appRows)
+                timesRow.remove(row);
+            const times = Object.entries(settings.get_value('copy-times').deep_unpack())
+                .sort(([a], [b]) => a.localeCompare(b));
+            appRows = times.map(([app, ms]) => {
+                const row = new Adw.ActionRow({title: app});
+                row.add_suffix(new Gtk.Label({label: _('{ms} ms', {ms}), css_classes: ['dim-label']}));
+                timesRow.add_row(row);
+                return row;
+            });
+            timesRow.subtitle = times.length
+                ? _('{count} apps · the wait is 2 × the slowest copy + 40 ms', {count: times.length})
+                : _('None yet — learned while fast mode is on');
+            timesRow.enable_expansion = times.length > 0;
+            forget.sensitive = times.length > 0;
+        };
+        settings.connect('changed::copy-times', syncTimes);
+        syncTimes();
+        group.add(timesRow);
 
         return group;
     }

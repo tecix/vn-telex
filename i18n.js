@@ -34,6 +34,15 @@ const VI = {
     'Selection wait time (ms)': 'Thời gian chờ vùng chọn (ms)',
     'How long to wait for copied text before treating the selection as empty. Lower is faster; raise it if some apps get treated as having no selection.':
         'Thời gian chờ text được sao chép trước khi coi như chưa bôi đen. Càng thấp càng nhanh; tăng lên nếu có app bị nhận nhầm là chưa bôi đen.',
+    'Advanced': 'Nâng cao',
+    'Fast mode': 'Chế độ nhanh',
+    'Speeds up “When nothing is selected”: reacts the moment an app copies, learns how fast each app copies and waits only that long, and skips the pauses between steps. If a slow app is wrongly treated as having no selection, forget its timing or turn this off.':
+        'Tăng tốc “Khi không bôi đen gì”: phản hồi ngay khi app sao chép xong, học tốc độ sao chép của từng app để chỉ chờ vừa đủ, và bỏ các khoảng nghỉ giữa các bước. Nếu một app chậm bị nhận nhầm là chưa bôi đen, hãy xoá thời gian đã học hoặc tắt chế độ này.',
+    'Learned app timings': 'Thời gian đã học theo app',
+    'Forget all learned timings': 'Xoá mọi thời gian đã học',
+    '{ms} ms': '{ms} ms',
+    '{count} apps · the wait is 2 × the slowest copy + 40 ms': '{count} app · thời gian chờ = 2 × lần sao chép chậm nhất + 40 ms',
+    'None yet — learned while fast mode is on': 'Chưa có — được học khi bật chế độ nhanh',
     'Show notifications': 'Hiện thông báo',
     'Tell me when a conversion can’t run (terminal, no text…)': 'Báo khi không chuyển được (terminal, không có text…)',
     'Language': 'Ngôn ngữ',

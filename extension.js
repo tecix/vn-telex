@@ -4,6 +4,8 @@
 // then restores the previous clipboard. Copyous is put in incognito mode meanwhile.
 // With nothing selected, selects to paragraph start (Ctrl+Shift+ArrowUp) and converts that —
 // automatically, after asking, or not at all (setting 'empty-selection').
+// Fast mode (setting 'fast-mode') reacts to the clipboard owner change instead of polling,
+// shortens the wait per app from learned copy times, and runs the fallback in one clipboard session.
 
 import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
@@ -35,6 +37,15 @@ const BUSY_TIMEOUT_MS = 5000;
 // Clipboard polling interval while waiting for Ctrl+C; the total wait is the 'copy-timeout' setting
 const COPY_POLL_MS = 30;
 
+// Fast mode wait per app: FACTOR × the slowest copy seen there + MARGIN, at least MIN, at most 'copy-timeout'
+const FAST_MIN_WAIT_MS = 80;
+const FAST_WAIT_FACTOR = 2;
+const FAST_WAIT_MARGIN_MS = 40;
+
+// Pause after Ctrl+Shift+ArrowUp before copying; virtual keys arrive in order, so fast mode needs little
+const SELECT_SETTLE_MS = 80;
+const SELECT_SETTLE_FAST_MS = 20;
+
 const MODS = Clutter.ModifierType.SHIFT_MASK | Clutter.ModifierType.CONTROL_MASK |
     Clutter.ModifierType.MOD1_MASK | Clutter.ModifierType.MOD4_MASK |
     Clutter.ModifierType.SUPER_MASK | Clutter.ModifierType.HYPER_MASK | Clutter.ModifierType.META_MASK;
@@ -49,6 +60,8 @@ export default class VnTelexExtension extends Extension {
         this._kbd = seat.create_virtual_device(Clutter.InputDeviceType.KEYBOARD_DEVICE);
         this._timeouts = new Set();
         this._busy = false;
+        this._loadCopyTimes();
+        this._settings.connectObject('changed::copy-times', () => this._loadCopyTimes(), this);
 
         Main.wm.addKeybinding('hotkey', this._settings,
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
@@ -58,6 +71,8 @@ export default class VnTelexExtension extends Extension {
 
     disable() {
         Main.wm.removeKeybinding('hotkey');
+        this._settings.disconnectObject(this);
+        global.display.get_selection().disconnectObject(this);
         this._dialog?.disconnectObject(this);
         this._dialog?.close();
         this._dialog = null;
@@ -69,6 +84,7 @@ export default class VnTelexExtension extends Extension {
             GLib.source_remove(id);
         this._timeouts = null;
         this._kbd = null;
+        this._copyTimes = null;
         this._clipboard = null;
         this._icon = null;
         this._settings = null;
@@ -90,6 +106,12 @@ export default class VnTelexExtension extends Extension {
             return GLib.SOURCE_REMOVE;
         });
         this._timeouts.add(id);
+        return id;
+    }
+
+    _cancel(id) {
+        if (this._timeouts?.delete(id))
+            GLib.source_remove(id);
     }
 
     // ---------- Notifications with the extension's own icon ----------
@@ -172,27 +194,38 @@ export default class VnTelexExtension extends Extension {
         }
         this._setBusy();
         const window = global.display.focus_window;
+        const fast = this._settings.get_boolean('fast-mode');
 
         this._afterModifiersReleased(() => {
-            this._convertSelection(found => {
+            this._withClipboard(end => this._copyConvertPaste((found, pasted) => {
                 if (found) {
-                    this._busy = false;
-                    return;
+                    end(pasted, () => {
+                        this._busy = false;
+                    });
+                } else if (fast && this._settings.get_string('empty-selection') === 'auto') {
+                    // Same clipboard session: no restore and no Copyous pause between the two copies
+                    this._selectToLineStart(SELECT_SETTLE_FAST_MS, () => this._copyConvertPaste((found2, pasted2) =>
+                        end(pasted2, () => this._lineStartDone(found2))));
+                } else {
+                    end(false, () => this._nothingSelected(window));
                 }
-                switch (this._settings.get_string('empty-selection')) {
-                case 'ask':
-                    this._busy = false;
-                    this._askSelectToLineStart(window);
-                    break;
-                case 'none':
-                    this._busy = false;
-                    this._notify(this._('Nothing is selected.'));
-                    break;
-                default:
-                    this._selectToLineStartAndConvert();
-                }
-            });
+            }));
         });
+    }
+
+    _nothingSelected(window) {
+        switch (this._settings.get_string('empty-selection')) {
+        case 'ask':
+            this._busy = false;
+            this._askSelectToLineStart(window);
+            break;
+        case 'none':
+            this._busy = false;
+            this._notify(this._('Nothing is selected.'));
+            break;
+        default:
+            this._selectToLineStartAndConvert();
+        }
     }
 
     _setBusy() {
@@ -207,51 +240,69 @@ export default class VnTelexExtension extends Extension {
 
     // Ctrl+Shift+ArrowUp selects back to the paragraph start, then convert that
     _selectToLineStartAndConvert() {
+        const settle = this._settings.get_boolean('fast-mode') ? SELECT_SETTLE_FAST_MS : SELECT_SETTLE_MS;
+        this._selectToLineStart(settle, () => this._convertSelection(found => this._lineStartDone(found)));
+    }
+
+    _selectToLineStart(settle, cb) {
         this._afterModifiersReleased(() => {
             this._ctrlShift(Clutter.KEY_Up);
-            this._later(80, () => {
-                this._convertSelection(found => {
-                    this._busy = false;
-                    if (!found)
-                        this._notify(this._('Couldn’t select any text before the cursor.'));
-                });
-            });
+            this._later(settle, cb);
         });
+    }
+
+    _lineStartDone(found) {
+        this._busy = false;
+        if (!found)
+            this._notify(this._('Couldn’t select any text before the cursor.'));
     }
 
     // Copy the selection, convert, paste, restore. done(found) runs once Copyous has settled.
     // The caller is responsible for clearing this._busy.
     _convertSelection(done) {
-        const type = St.ClipboardType.CLIPBOARD;
-        const finish = this._beginIncognito();
+        this._withClipboard(end => this._copyConvertPaste((found, pasted) => end(pasted, () => done(found))));
+    }
 
-        this._saveClipboard(saved => {
-            // A marker tells us whether Ctrl+C copied anything
-            const marker = `⁣vntelex${GLib.get_monotonic_time()}`;
-            this._clipboard.set_text(type, marker);
-            this._ctrl(Clutter.KEY_c);
-            this._waitForCopy(marker, 0, text => {
-                if (!text) {
-                    this._restoreClipboard(saved);
-                    finish(() => done(false));
-                    return;
-                }
-                const out = telexTransform(text, parseSkips(this._settings.get_string('skip-words')));
-                if (out === text) {
-                    this._restoreClipboard(saved);
-                    finish(() => done(true));
-                    return;
-                }
-                this._clipboard.set_text(type, out);
-                this._later(30, () => {
-                    this._ctrl(Clutter.KEY_v);
-                    this._later(400, () => {
-                        this._restoreClipboard(saved);
-                        finish(() => done(true));
-                    });
-                });
+    // Save the clipboard and enter Copyous incognito, then run fn(end).
+    // end(pasted, cb) restores the clipboard (after the app has read a paste), leaves incognito, then calls cb.
+    _withClipboard(fn) {
+        const finish = this._beginIncognito();
+        this._saveClipboard(saved => fn((pasted, cb) => {
+            const restore = () => {
+                this._restoreClipboard(saved);
+                finish(cb);
+            };
+            if (pasted)
+                this._later(400, restore);
+            else
+                restore();
+        }));
+    }
+
+    // Ctrl+C, convert, Ctrl+V. cb(found, pasted): found when something was copied,
+    // pasted when the conversion changed it and Ctrl+V was sent.
+    _copyConvertPaste(cb) {
+        const type = St.ClipboardType.CLIPBOARD;
+        // A marker tells us whether Ctrl+C copied anything
+        const marker = `⁣vntelex${GLib.get_monotonic_time()}`;
+        this._clipboard.set_text(type, marker);
+        this._waitForCopy(marker, text => {
+            if (!text) {
+                cb(false, false);
+                return;
+            }
+            const out = telexTransform(text, parseSkips(this._settings.get_string('skip-words')));
+            if (out === text) {
+                cb(true, false);
+                return;
+            }
+            this._clipboard.set_text(type, out);
+            this._later(30, () => {
+                this._ctrl(Clutter.KEY_v);
+                cb(true, true);
             });
         });
+        this._ctrl(Clutter.KEY_c);
     }
 
     // Nothing selected: ask before selecting from the cursor to the start of the line
@@ -290,8 +341,17 @@ export default class VnTelexExtension extends Extension {
         dialog.open(global.get_current_time());
     }
 
-    // Poll the clipboard until the app has replaced our marker (max 'copy-timeout' ms)
-    _waitForCopy(marker, tries, cb) {
+    // Wait until the app has replaced our marker on the clipboard: cb(text), or cb(null) on timeout.
+    // Call it before sending Ctrl+C.
+    _waitForCopy(marker, cb) {
+        if (this._settings.get_boolean('fast-mode'))
+            this._watchCopy(marker, cb);
+        else
+            this._pollCopy(marker, 0, cb);
+    }
+
+    // Poll the clipboard (max 'copy-timeout' ms)
+    _pollCopy(marker, tries, cb) {
         this._later(COPY_POLL_MS, () => {
             this._clipboard.get_text(St.ClipboardType.CLIPBOARD, (_c, text) => {
                 if (!this._settings)
@@ -301,10 +361,66 @@ export default class VnTelexExtension extends Extension {
                 } else if ((tries + 1) * COPY_POLL_MS >= this._settings.get_int('copy-timeout')) {
                     cb(null);
                 } else {
-                    this._waitForCopy(marker, tries + 1, cb);
+                    this._pollCopy(marker, tries + 1, cb);
                 }
             });
         });
+    }
+
+    // Fast mode: react as soon as the app takes the clipboard; give up after the learned wait for this app
+    _watchCopy(marker, cb) {
+        const app = this._appId();
+        const start = GLib.get_monotonic_time();
+        const selection = global.display.get_selection();
+        let timer = 0;
+        let finished = false;
+        const stop = text => {
+            if (finished)
+                return;
+            finished = true;
+            selection.disconnectObject(this);
+            this._cancel(timer);
+            if (text)
+                this._learnCopyTime(app, (GLib.get_monotonic_time() - start) / 1000);
+            cb(text);
+        };
+        selection.connectObject('owner-changed', (_s, selectionType) => {
+            if (selectionType !== Meta.SelectionType.SELECTION_CLIPBOARD)
+                return;
+            this._clipboard.get_text(St.ClipboardType.CLIPBOARD, (_c, text) => {
+                if (this._settings && text && text !== marker)
+                    stop(text);
+            });
+        }, this);
+        timer = this._later(this._copyWait(app), () => stop(null));
+    }
+
+    // ---------- Learned copy times (fast mode) ----------
+
+    // Key for the learned copy times: the focused app
+    _appId() {
+        const w = global.display.focus_window;
+        return (w?.get_gtk_application_id?.() || w?.get_wm_class() || '').toLowerCase();
+    }
+
+    // A margin over the slowest copy seen in this app, never above 'copy-timeout'
+    _copyWait(app) {
+        const max = this._settings.get_int('copy-timeout');
+        const learned = this._copyTimes[app];
+        if (learned === undefined)
+            return max;
+        return Math.min(max, Math.max(FAST_MIN_WAIT_MS, FAST_WAIT_FACTOR * learned + FAST_WAIT_MARGIN_MS));
+    }
+
+    _loadCopyTimes() {
+        this._copyTimes = this._settings.get_value('copy-times').deep_unpack();
+    }
+
+    _learnCopyTime(app, ms) {
+        ms = Math.ceil(ms);
+        if (!app || ms <= (this._copyTimes[app] ?? -1))
+            return;
+        this._settings.set_value('copy-times', new GLib.Variant('a{si}', {...this._copyTimes, [app]: ms}));
     }
 
     // ---------- Clipboard save / restore ----------
