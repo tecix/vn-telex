@@ -212,7 +212,7 @@ export default class VnTelexPrefs extends ExtensionPreferences {
             description: _('Type Telex below to see the result (skip words applied).'),
         });
 
-        const input = new Adw.EntryRow({title: _('Telex text'), text: 'Tieengs Vieetj khoong daaus, deploy len server'});
+        const input = new Adw.EntryRow({title: _('Telex text'), text: 'Tieengs Vieetj khoong daaus, deploy leen server'});
         const output = new Adw.ActionRow({
             title: '',
             subtitle_selectable: true,

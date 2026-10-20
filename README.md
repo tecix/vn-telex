@@ -5,6 +5,10 @@
 <h1 align="center">VN Telex</h1>
 
 <p align="center">
+  🇬🇧 <b>English</b> · 🇻🇳 <a href="README.vi.md">Tiếng Việt</a>
+</p>
+
+<p align="center">
   Turn Telex text into accented Vietnamese, right where you typed it.<br>
   A GNOME Shell extension for Wayland and X11, for GNOME 46 to 51.
 </p>
@@ -15,13 +19,28 @@ Typed a whole sentence before you noticed your Vietnamese input method was off? 
 **Super+Shift+A**, and it's fixed in place:
 
 ```
-Tieengs Vieetj khoong daaus, deploy len server
+Tieengs Vieetj khoong daaus, deploy leen server
                     ↓
-Tiếng Việt không dấu, deploy len server
+Tiếng Việt không dấu, deploy lên server
 ```
 
 No input method needed and no copying back and forth. It works in browsers, editors, chat apps, and any
 other app that supports Ctrl+C and Ctrl+V.
+
+## Use cases
+
+- 🧑‍💻 **English-first developers.** Your OS, editor and keyboard live in English and you don't want a
+  Vietnamese IME hijacking every keystroke. Type Telex freely, convert only when you need to.
+- 🙅 **No IME at all.** Skip installing and configuring IBus/Fcitx just to send the occasional Vietnamese
+  message. One extension, one shortcut.
+- 😅 **"Oops, the IME was off."** You typed a whole paragraph as `ddi awn cowm chuwa`? Select it, press the
+  shortcut, done. No retyping.
+- 🐛 **IME fighting your tools.** Autocomplete, code editors and web apps that glitch with pre-edit text
+  (duplicated letters, swallowed characters) are no problem: you type plain ASCII and convert afterwards.
+- 💬 **Mixed Vietnamese and tech talk.** Chatting with your team about `deploy`, `merge` and `staging` in
+  Vietnamese? English words stay untouched while the Telex around them gets its accents.
+- 🖥️ **Terminal and Neovim users.** Pipe text through `cli.js` or bind it to a key in Vim to write commit
+  messages and notes in Vietnamese.
 
 ## Features
 
@@ -138,6 +157,13 @@ journalctl -f -o cat /usr/bin/gnome-shell | grep -i telex
 - GNOME Shell 46, 47, 48, 49, 50 and 51
 - Wayland and X11
 - The app must support Ctrl+C and Ctrl+V. Terminals are detected and skipped.
+
+## TODO
+
+- [ ] 🖥️ **Terminals:** convert in place in terminal emulators (GNOME Terminal, Ptyxis, Kitty, Alacritty,
+  WezTerm) using Ctrl+Shift+C / Ctrl+Shift+V instead of skipping them.
+- [ ] 🦊 **Firefox extension:** convert the selection in any text field, on every OS.
+- [ ] 🌐 **Chrome extension:** the same for Chrome, Edge, Brave and other Chromium browsers.
 
 ## Credits
 
