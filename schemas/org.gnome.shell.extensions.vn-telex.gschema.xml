@@ -12,7 +12,7 @@
   </enum>
   <schema id="org.gnome.shell.extensions.vn-telex" path="/org/gnome/shell/extensions/vn-telex/">
     <key name="hotkey" type="as">
-      <default><![CDATA[['<Super><Shift>a']]]></default>
+      <default>[]</default>
       <summary>Shortcut that converts the selection</summary>
     </key>
     <key name="empty-selection" enum="org.gnome.shell.extensions.vn-telex.EmptySelection">

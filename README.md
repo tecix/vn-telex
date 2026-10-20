@@ -10,13 +10,13 @@
 
 <p align="center">
   Turn Telex text into accented Vietnamese, right where you typed it.<br>
-  A GNOME Shell extension for Wayland and X11, for GNOME 46 to 51.
+  A GNOME Shell extension for Wayland and X11, for GNOME 46 to 50.
 </p>
 
 ---
 
 Typed a whole sentence before you noticed your Vietnamese input method was off? Select it, press
-**Super+Shift+A**, and it's fixed in place:
+your shortcut (for example **Super+Shift+A**), and it's fixed in place:
 
 ```
 Tieengs Vieetj khoong daaus, deploy leen server
@@ -78,12 +78,15 @@ gnome-extensions enable vn-telex@tecix
 On Wayland, log out and back in so GNOME Shell loads the new extension. On X11, you can press Alt+F2, type
 `r` and press Enter instead.
 
+No shortcut is set by default, because the extension works through the clipboard. Open Preferences
+(`gnome-extensions prefs vn-telex@tecix`) and click **Shortcut** to pick one, for example **Super+Shift+A**.
+
 To update, run `git pull` in that folder and log out and back in.
 
 ## Usage
 
 1. Select text typed in Telex.
-2. Press **Super+Shift+A**.
+2. Press your shortcut.
 
 To change the shortcut and other settings, open Preferences:
 
@@ -93,7 +96,7 @@ gnome-extensions prefs vn-telex@tecix
 
 | Setting | Default | Description |
 |---|---|---|
-| Shortcut | `Super+Shift+A` | Click the row and press a new combination. |
+| Shortcut | Not set | Click the row and press a combination, for example `Super+Shift+A`. |
 | When nothing is selected | Select to paragraph start | Sends Ctrl+Shift+↑ and converts the result. You can also choose *Ask first* or *Do nothing*. |
 | Selection wait time | 600 ms | How long to wait for Ctrl+C to copy something before treating the selection as empty. Lower it to make *When nothing is selected* kick in faster; raise it if a slow app is wrongly treated as having no selection. |
 | Show notifications | On | Tells you when nothing could be converted. |
@@ -154,7 +157,7 @@ journalctl -f -o cat /usr/bin/gnome-shell | grep -i telex
 
 ## Compatibility
 
-- GNOME Shell 46, 47, 48, 49, 50 and 51
+- GNOME Shell 46, 47, 48, 49 and 50
 - Wayland and X11
 - The app must support Ctrl+C and Ctrl+V. Terminals are detected and skipped.
 

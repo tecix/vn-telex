@@ -10,12 +10,12 @@
 
 <p align="center">
   Biến chữ gõ kiểu Telex thành tiếng Việt có dấu, ngay tại chỗ bạn gõ.<br>
-  Extension cho GNOME Shell, chạy trên Wayland và X11, hỗ trợ GNOME 46 đến 51.
+  Extension cho GNOME Shell, chạy trên Wayland và X11, hỗ trợ GNOME 46 đến 50.
 </p>
 
 ---
 
-Gõ xong cả câu mới phát hiện bộ gõ tiếng Việt đang tắt? Bôi đen đoạn đó, nhấn **Super+Shift+A**, và
+Gõ xong cả câu mới phát hiện bộ gõ tiếng Việt đang tắt? Bôi đen đoạn đó, nhấn phím tắt của bạn (ví dụ **Super+Shift+A**), và
 nó được sửa ngay tại chỗ:
 
 ```
@@ -77,12 +77,15 @@ gnome-extensions enable vn-telex@tecix
 Trên Wayland, đăng xuất rồi đăng nhập lại để GNOME Shell nạp extension mới. Trên X11, bạn có thể nhấn
 Alt+F2, gõ `r` rồi nhấn Enter.
 
+Mặc định chưa có phím tắt, vì extension hoạt động qua clipboard. Mở phần Cài đặt
+(`gnome-extensions prefs vn-telex@tecix`) và nhấp vào **Phím tắt** để chọn, ví dụ **Super+Shift+A**.
+
 Để cập nhật, chạy `git pull` trong thư mục đó rồi đăng xuất và đăng nhập lại.
 
 ## Cách dùng
 
 1. Chọn đoạn văn bản gõ kiểu Telex.
-2. Nhấn **Super+Shift+A**.
+2. Nhấn phím tắt của bạn.
 
 Để đổi phím tắt và các thiết lập khác, mở phần Cài đặt:
 
@@ -92,7 +95,7 @@ gnome-extensions prefs vn-telex@tecix
 
 | Thiết lập | Mặc định | Mô tả |
 |---|---|---|
-| Phím tắt | `Super+Shift+A` | Nhấp vào dòng này rồi nhấn tổ hợp phím mới. |
+| Phím tắt | Chưa đặt | Nhấp vào dòng này rồi nhấn một tổ hợp phím, ví dụ `Super+Shift+A`. |
 | Khi không bôi đen gì | Tự chọn tới đầu đoạn | Gửi Ctrl+Shift+↑ rồi chuyển phần được chọn. Bạn cũng có thể chọn *Hỏi trước* hoặc *Không làm gì*. |
 | Thời gian chờ vùng chọn | 600 ms | Thời gian chờ Ctrl+C sao chép được gì đó trước khi coi như không có vùng chọn. Giảm xuống để *Khi không bôi đen gì* phản hồi nhanh hơn; tăng lên nếu một ứng dụng chậm bị coi nhầm là không có vùng chọn. |
 | Hiện thông báo | Bật | Báo cho bạn khi không có gì để chuyển. |
@@ -152,7 +155,7 @@ journalctl -f -o cat /usr/bin/gnome-shell | grep -i telex
 
 ## Tương thích
 
-- GNOME Shell 46, 47, 48, 49, 50 và 51
+- GNOME Shell 46, 47, 48, 49 và 50
 - Wayland và X11
 - Ứng dụng phải hỗ trợ Ctrl+C và Ctrl+V. Terminal được nhận diện và bỏ qua.
 

@@ -33,6 +33,9 @@ export default class VnTelexPrefs extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
         const _ = this._ = translator(settings);
+        window.connect('close-request', () => {
+            this._ = null;
+        });
         window.set_default_size(640, 760);
         window.set_search_enabled(true);
 
@@ -69,7 +72,7 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         });
         const resetHotkey = new Gtk.Button({
             icon_name: 'edit-undo-symbolic',
-            tooltip_text: _('Reset to default'),
+            tooltip_text: _('Remove shortcut'),
             valign: Gtk.Align.CENTER,
             css_classes: ['flat'],
         });
@@ -312,7 +315,7 @@ export default class VnTelexPrefs extends ExtensionPreferences {
             const q = filter.text.trim().toLowerCase();
             const shown = all.filter(w => w.includes(q)).sort();
             for (const word of shown)
-                flow.append(this._chip(word, () => {
+                flow.append(this._chip(_, word, () => {
                     save(words().filter(w => w !== word));
                     toast(_('Removed “{word}”', {word}));
                 }));
@@ -352,12 +355,12 @@ export default class VnTelexPrefs extends ExtensionPreferences {
         return group;
     }
 
-    _chip(word, onRemove) {
+    _chip(_, word, onRemove) {
         const box = new Gtk.Box({spacing: 2, css_classes: ['card']});
         box.append(new Gtk.Label({label: word, margin_start: 10, margin_end: 2}));
         const remove = new Gtk.Button({
             icon_name: 'window-close-symbolic',
-            tooltip_text: this._('Remove “{word}”', {word}),
+            tooltip_text: _('Remove “{word}”', {word}),
             css_classes: ['flat', 'circular'],
             valign: Gtk.Align.CENTER,
         });

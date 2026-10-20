@@ -58,9 +58,11 @@ export default class VnTelexExtension extends Extension {
 
     disable() {
         Main.wm.removeKeybinding('hotkey');
+        this._dialog?.disconnectObject(this);
         this._dialog?.close();
         this._dialog = null;
         this._endIncognito?.();
+        this._source?.disconnectObject(this);
         this._source?.destroy();
         this._source = null;
         for (const id of this._timeouts)
@@ -97,9 +99,9 @@ export default class VnTelexExtension extends Extension {
             return;
         if (!this._source) {
             this._source = new MessageTray.Source({title: 'VN Telex', icon: this._icon});
-            this._source.connect('destroy', () => {
+            this._source.connectObject('destroy', () => {
                 this._source = null;
-            });
+            }, this);
             Main.messageTray.add(this._source);
         }
         const notification = new MessageTray.Notification({
@@ -271,7 +273,7 @@ export default class VnTelexExtension extends Extension {
             }, default: true},
         ]);
 
-        dialog.connect('closed', () => {
+        dialog.connectObject('closed', () => {
             this._dialog = null;
             if (!accepted || !this._settings)
                 return;
@@ -282,7 +284,7 @@ export default class VnTelexExtension extends Extension {
                     window.activate(global.get_current_time());
                 this._later(100, () => this._selectToLineStartAndConvert());
             });
-        });
+        }, this);
 
         this._dialog = dialog;
         dialog.open(global.get_current_time());

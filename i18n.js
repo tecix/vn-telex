@@ -23,6 +23,7 @@ const VI = {
     'Click to set a new shortcut': 'Bấm để đặt phím tắt mới',
     'Disabled': 'Chưa đặt',
     'Reset to default': 'Khôi phục mặc định',
+    'Remove shortcut': 'Xoá phím tắt',
     'When nothing is selected': 'Khi không bôi đen gì',
     'Select to paragraph start': 'Tự chọn tới đầu đoạn',
     'Press Ctrl+Shift+↑, then convert': 'Ctrl+Shift+↑ rồi chuyển luôn',
