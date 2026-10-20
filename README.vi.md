@@ -13,6 +13,10 @@
   Extension cho GNOME Shell, chạy trên Wayland và X11, hỗ trợ GNOME 46 đến 50.
 </p>
 
+<p align="center">
+  <img src="screenshots/vn-telex.png" alt="VN Telex chuyển chữ Telex, bên cạnh cửa sổ Cài đặt">
+</p>
+
 ---
 
 Gõ xong cả câu mới phát hiện bộ gõ tiếng Việt đang tắt? Bôi đen đoạn đó, nhấn phím tắt của bạn (ví dụ **Super+Shift+A**), và
@@ -139,6 +143,7 @@ i18n.js        Chuỗi gốc tiếng Anh và bản dịch tiếng Việt
 cli.js         Bộ lọc dòng lệnh (gjs)
 schemas/       GSettings schema
 icons/         Biểu tượng extension
+screenshots/   Hình ảnh cho README và extensions.gnome.org
 ```
 
 Sau khi sửa schema, biên dịch lại:

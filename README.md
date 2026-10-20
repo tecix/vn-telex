@@ -13,6 +13,10 @@
   A GNOME Shell extension for Wayland and X11, for GNOME 46 to 50.
 </p>
 
+<p align="center">
+  <img src="screenshots/vn-telex.png" alt="VN Telex converting Telex text, next to its Preferences window">
+</p>
+
 ---
 
 Typed a whole sentence before you noticed your Vietnamese input method was off? Select it, press
@@ -141,6 +145,7 @@ i18n.js        English source strings and Vietnamese translations
 cli.js         Command-line filter (gjs)
 schemas/       GSettings schema
 icons/         Extension icon
+screenshots/   Images for the README and extensions.gnome.org
 ```
 
 After you edit the schema, recompile it:
